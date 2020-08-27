@@ -1,0 +1,15 @@
+a1 = LOAD 'pixels-small.txt' USING PigStorage(',') as (red:int, green:int, blue:int);
+b1 = FOREACH a1 GENERATE 1 as type, red;
+b2 = FOREACH a1 GENERATE 2 as type, green;
+b3 = FOREACH a1 GENERATE 3 as type, blue;
+c1 = GROUP b1 BY (red);
+c2 = GROUP b2 BY (green);
+c3 = GROUP b3 BY (blue);
+d1 = FOREACH c1 GENERATE 1 as type, group, COUNT(b1) as c;
+d2 = FOREACH c2 GENERATE 2 as type, group, COUNT(b2) as c;
+d3 = FOREACH c3 GENERATE 3 as type, group, COUNT(b3)as c;
+Y = UNION d1,d2,d3;
+X = FOREACH Y GENERATE type, group, c;    
+temp = group X by 1;
+temp = foreach temp generate flatten(X);            
+STORE temp INTO '$O' USING PigStorage;
